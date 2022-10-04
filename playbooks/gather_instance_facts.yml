@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  gather_facts: True
+  become: True
+  tasks:
+  
+  - name: get host data
+    uri:
+      url: "http://169.254.169.254/opc/v1/instance/"
+      return_content: yes
+    register: instance_metadata
+    tags:
+    - always
+
+  - debug:
+      var: instance_metadata
