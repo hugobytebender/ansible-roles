@@ -10,7 +10,4 @@
       return_content: yes
     register: instance_metadata
     tags:
-    - always
-
-  - debug:
-      var: instance_metadata
+     - always
