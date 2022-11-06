@@ -1,0 +1,11 @@
+---
+# tasks file for gather_instance_metadata  
+- name: get host data
+  uri:
+    url: "http://169.254.169.254/opc/v1/instance/"
+    return_content: yes
+  register: instance_metadata
+  tags:
+   - always
+
+   

@@ -1,2 +1,6 @@
 ---
 # tasks file for deploy_java
+- name: Assert that the hostname is an app instance
+  assert:
+    that: 
+      

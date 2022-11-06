@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  become: True
+  gather_facts: True
+  roles:
+    - gather_instance_metadata
