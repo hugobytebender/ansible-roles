@@ -27,14 +27,7 @@
 
 - name: untar openjdk11 tar file
   shell: tar -xvf "{{ java_tar_file }}"
-
-- name: find jdk11 directory within /opt
-  shell: ls -l /opt/*jdk-11*
-  register: jdk11_dir
-
-- debug:
-    var: jdk11_dir  
-
+  
 - name: find openjdk-11 
   ansible.builtin.find:
     paths: /opt/

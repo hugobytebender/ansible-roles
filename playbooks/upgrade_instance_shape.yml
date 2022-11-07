@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  gather_facts: True
+  become: False
+  vars:
+    instance_name: "infdevashzzz01"
+    compartment_id: "ocid1.compartment.oc1..aaaaaaaaipzneosdsski7h64xnncfrv3zmzd3mt5gvwm55mhptna4z5ibrea"
+    instance_id: "ocid1.instance.oc1.iad.anuwcljtxfvmdsic7qhulyp6b3endvowwgrts43dhurz26gjj3irjg5b5ngq"
+
+  pre_tasks:
+  - name: Assert that variables are defined to proceed with the instance shape upgrade
+    assert:
+      that: 
+      - instance_name is defined
+      - compartment_id is defined 
+      - instance_id is defined
+  
+  
+  tasks:
+  
+  - name: get instance shape facts
+    oracle.oci.oci_compute_instance_facts:
+        compartment_id: "{{ compartment_id }}"
+        instance_id: "{{ instance_id }}"
+        display_name: "{{ instance_name }}"
+    delegate_to: localhost    
+    register: compute_instance_facts 
+
+  - debug:
+      var: compute_instance_facts  
+
+  - name: Upgrade instance shape
+    oracle.oci.oci_compute_instance:
+       state: present
+       instance_id: "{{ instance_id }}"
+       compartment_id: "{{ compartment_id }}"
+       shape: "VM.Standard.E2.1.Micro"
+    register: instance_shape_status
+
+  - debug:
+      var: instance_shape_status   
+
+
