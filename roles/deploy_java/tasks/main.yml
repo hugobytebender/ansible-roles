@@ -1,6 +1,84 @@
 ---
-# tasks file for deploy_java
-- name: Assert that the hostname is an app instance
+
+- name: This role will retrieve instance_metadata facts 
+  include_role: 
+    name: gather_instance_metadata
+
+- name: check that /opt/java directory exists
+  stat:
+    path: /opt/java
+  register: java_dir
+
+- name: Assert that the ansible remote hostname is an app instance
   assert:
     that: 
+      - ansible_hostname[10:13] == "zz0"
+      - java_dir.stat.exists != "true"
+
+- name: download java 11 repo from source 
+  ansible.builtin.uri:
+    url: https://download.java.net/java/GA/jdk11/9/GPL/openjdk-11.0.2_linux-x64_bin.tar.gz
+    dest: /opt
+  ignore_errors: yes   
+  register: java11_package_output
+
+- set_fact:
+      java_tar_file: "{{ java11_package_output.path }}"
+
+- name: untar openjdk11 tar file
+  shell: tar -xvf "{{ java_tar_file }}"
+
+- name: find jdk11 directory within /opt
+  shell: ls -l /opt/*jdk-11*
+  register: jdk11_dir
+
+- debug:
+    var: jdk11_dir  
+
+- name: find openjdk-11 
+  ansible.builtin.find:
+    paths: /opt/
+    patterns: '^jdk-11(.*)$'
+    file_type: directory
+    use_regex: yes
+    recurse: yes 
+  register: openjdk11_output
+
+- set_fact:
+    jdk11_path: "{{ openjdk11_output.files[0].path }}"  
+
+- name: Fix directory permissions
+  ansible.builtin.file:
+    path: "{{ jdk11_path }}"
+    state: directory
+    recurse: yes
+    owner: root
+    group: root 
+    mode: '0755'
+
+- name: Create symlink for /opt/java
+  ansible.builtin.file:
+    src: /opt/jdk-11.0.2
+    dest: /opt/java 
+    owner: root
+    group: root
+    state: link  
+
+- name: sets the environment variables at startup of the Bash shell
+  ansible.builtin.copy: 
+    src: java_env
+    dest: /etc/profile.d/java_env.sh 
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: set alternatives for JAVA
+  shell: alternatives --install /usr/bin/java java /opt/java/bin/java 1100
+
+- name: print java version
+  shell: java --version
+  register: java_version
+
+- debug:
+    var: java_version.stdout_lines[0]
       

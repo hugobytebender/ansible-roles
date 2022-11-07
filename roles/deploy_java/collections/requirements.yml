@@ -1,0 +1,4 @@
+collections:
+  - name: https://github.com/hugothesnappertm/ansible-roles/tree/devel/roles/gather_instance_metadata.git
+    type: git
+    version: devel 
